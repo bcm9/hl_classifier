@@ -29,25 +29,31 @@ n_samples = 5000
 X = pd.DataFrame({
     'Age': np.random.randint(20, 100, n_samples),
     'PTA': np.random.normal(30, 12, n_samples),  # Pure-tone average in dB
-    'Speech': np.random.normal(80, 5, n_samples),   # Speech recognition score in %
-    'Tympanometry': np.random.normal(1.5, 0.5, n_samples)  # Tympanometry score
+    'Speech': np.random.normal(80, 5, n_samples),  # Speech recognition score in %
+    'Tympanometry': np.random.normal(1.5, 0.5, n_samples),  # Tympanometry score
+    'Noise_Exposure_Years': np.random.randint(0, 40, n_samples),  # Years of noise exposure
+    'Family_History_HL': np.random.choice([0, 1], n_samples, p=[0.7, 0.3]),  # Binary: 30% have family history of HL
+    'Occupation': np.random.choice(['Office', 'Construction', 'Factory', 'Music'], n_samples, p=[0.5, 0.2, 0.2, 0.1]),  # Categorical
 })
+
+# Convert 'Occupation' to dummy variables for model use
+X = pd.get_dummies(X, columns=['Occupation'], drop_first=True)
 
 # Binary target: 1 = Hearing impairment, 0 = No hearing impairment
 # Hearing impairment is influenced by a combination of PTA, Age, and Speech, but with some randomness
 noise = np.random.rand(n_samples)
-y = (((X['PTA'] > 40) & (X['Age'] > 65)) | (X['Speech'] < 70) | (noise > 0.9)).astype(int)
+y = (((X['PTA'] > 40) & (X['Age'] > 65)) | (X['Speech'] < 70) | (noise > 0.85)).astype(int)
 
 # Split the data into training and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Scale the features
+# Scale features
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # SelectKBest feature selection
-k_best = SelectKBest(score_func=f_classif, k=3)  # Select top 3 features
+k_best = SelectKBest(score_func=f_classif, k=4)  # Select top 3 features
 X_train_k_best = k_best.fit_transform(X_train_scaled, y_train)
 X_test_k_best = k_best.transform(X_test_scaled)
 

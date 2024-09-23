@@ -36,8 +36,7 @@ X = pd.DataFrame({
 # Binary target: 1 = Hearing impairment, 0 = No hearing impairment
 # Hearing impairment is influenced by a combination of PTA, Age, and Speech, but with some randomness
 noise = np.random.rand(n_samples)
-y = (((X['PTA'] > 35) & (X['Age'] > 50)) | (X['Speech'] < 75) | (noise > 0.8)).astype(int)
-
+y = (((X['PTA'] > 40) & (X['Age'] > 65)) | (X['Speech'] < 70) | (noise > 0.9)).astype(int)
 
 # Split the data into training and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)

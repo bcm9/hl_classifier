@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 ################################################################################################################################################
 # Input data
 np.random.seed(42)
-n_samples = 5000
+n_samples = 1000
 
 # Features: Age, Pure-tone average (PTA) in dB, Speech discrimination score (SDS), Tympanometry score
 X = pd.DataFrame({
@@ -40,11 +40,37 @@ X = pd.DataFrame({
 X = pd.get_dummies(X, columns=['Occupation'], drop_first=True)
 
 # Binary target: 1 = Hearing impairment, 0 = No hearing impairment
-# Hearing impairment is influenced by a combination of PTA, Age, and Speech, but with some randomness
-noise = np.random.rand(n_samples)
-y = (((X['PTA'] > 40) & (X['Age'] > 65)) | (X['Speech'] < 70) | (noise > 0.85)).astype(int)
+# Generate HI y based on probability
+# Probability of hearing loss based on features using log. function
+def calculate_hl_probability(row):
+    # Use a weighted sum of features to determine probability of HL
+    score = (
+        0.03 * row['Age'] +      # Older individuals have higher chance of HL
+        0.08 * row['PTA'] +      # PTA is a strong predictor
+        -0.05 * row['Speech'] +  # Lower speech scores increase chance of HL
+        0.02 * row['Noise_Exposure_Years'] +  # More noise exposure increases chance
+        0.05 * row['Family_History_HL']  # Family history increases HL risk
+    )
+    # Convert the score to a probability using logistic function
+    probability = 1 / (1 + np.exp(-score))
+    return probability
 
-# Split the data into training and test sets
+# Calculate probability of hearing loss for each individual
+X['HL_Probability'] = X.apply(calculate_hl_probability, axis=1)
+
+# Create binary target: 1 = Hearing impairment, 0 = No hearing impairment (using probability threshold)
+y = (X['HL_Probability'] > 0.5).astype(int)
+
+# Drop the 'HL_Probability' column after classification
+X = X.drop(columns=['HL_Probability'])
+
+# Display the first few rows of the dataset
+print(X.head())
+print(y.head())
+
+################################################################################################################################################
+# Split data into training and test sets
+################################################################################################################################################
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Scale features

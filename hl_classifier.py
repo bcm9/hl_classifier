@@ -40,7 +40,7 @@ X = pd.DataFrame({
 X = pd.get_dummies(X, columns=['Occupation'], drop_first=True)
 
 # Binary target: 1 = Hearing impairment, 0 = No hearing impairment
-# Generate HI y based on probability
+# Generate y based on probability
 # Probability of hearing loss based on features using log. function
 def calculate_hl_probability(row):
     # Use a weighted sum of features to determine probability of HL

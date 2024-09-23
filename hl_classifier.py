@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 ################################################################################################################################################
 # Input data
 np.random.seed(42)
-n_samples = 1000
+n_samples = 5000
 
 # Features: Age, Pure-tone average (PTA) in dB, Speech discrimination score (SDS), Tympanometry score
 X = pd.DataFrame({
